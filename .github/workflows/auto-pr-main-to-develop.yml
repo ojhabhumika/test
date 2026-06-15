@@ -1,0 +1,46 @@
+name: Auto PR — main → develop
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for existing PR and create if absent
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if an open PR already exists from main → develop
+          EXISTING_PR=$(gh pr list \
+            --base develop \
+            --head main \
+            --state open \
+            --json number \
+            --jq '.[0].number')
+
+          if [ -n "$EXISTING_PR" ]; then
+            echo "✅ PR #$EXISTING_PR already exists (main → develop). Skipping creation."
+          else
+            echo "🚀 No existing PR found. Creating PR from main → develop..."
+            gh pr create \
+              --base develop \
+              --head main \
+              --title "sync: merge main into develop" \
+              --body "This PR was automatically created to sync changes from \`main\` back into \`develop\`.
+
+          **Triggered by:** \`${{ github.actor }}\`
+          **Commit:** \`${{ github.sha }}\`
+          **Run:** [View workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          fi
