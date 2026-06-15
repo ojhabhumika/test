@@ -37,7 +37,7 @@ jobs:
             gh pr create \
               --base develop \
               --head main \
-              --title "sync: merge main into develop" \
+              --title "Back Merge" \
               --body "This PR was automatically created to sync changes from \`main\` back into \`develop\`.
 
           **Triggered by:** \`${{ github.actor }}\`
